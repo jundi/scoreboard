@@ -3,6 +3,7 @@
 
 import argparse
 from appy.pod.renderer import Renderer
+uno_path="/usr/bin/python"
 
 
 
@@ -18,13 +19,14 @@ output_file_name='result.pdf'
 ### PARSE ARGUMENTS
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", help="Input file")
+parser.add_argument("-o", help="Output file")
 args = parser.parse_args()
 
 if args.f:
     input_file_name = args.f
-else:
-    if __name__ == "__main__":
-        exit()
+
+if args.o:
+    output_file_name = args.o
 
 
 
@@ -48,7 +50,7 @@ page=0
 player_num=0
 while player_num < len(players):
    page_output_file_name = ''.join(output_file_name.split('.')[:-1]) + '_' + str(page) + '.' + output_file_name.split('.')[-1] 
-   renderer = Renderer(template_file_name, globals(), page_output_file_name)
+   renderer = Renderer(template_file_name, globals(), page_output_file_name, pythonWithUnoPath=uno_path)
    renderer.run()
    page = page+1
    player_num = page*players_per_page
