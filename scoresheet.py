@@ -55,7 +55,13 @@ players=[]
 # read file
 with open(input_file_name) as input_file:
     for line in input_file:
-        players.append(line.split(sep))
+        if line.isspace():
+            continue
+        words=line.split(sep)
+        if len(words) == 3:
+            players.append(words)
+        else:
+            exit("Faulty line: " + line)
 
 # add empty lines to player list if needed
 while len(players)%players_per_page > 0:
