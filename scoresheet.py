@@ -3,6 +3,11 @@
 Reads text file with rows formatted as:
 <Name>,<Team>,<Serie>
 and exports scoresheets in ods/pdf format.
+
+The script is using LibreOffice UNO API. UNO server can be started with command:
+soffice --accept="socket,port=2002;urp;"
+If the python interpreter running the script is not UNO-enabled, the path of
+UNO-enabled python can be provided with -u argument
 '''
 import argparse
 import os.path
