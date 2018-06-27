@@ -12,6 +12,7 @@ UNO-enabled python can be provided with -u argument
 '''
 import argparse
 import os.path
+import tempfile
 import appy.pod.renderer
 import pyPdf
 
@@ -141,7 +142,7 @@ def main():
     # Write scoresheets one printable page per file. If output file is pdf, the
     # pages will be merged into one document.
     if filetype == 'pdf':
-        page_output_directory = '/tmp/'
+        page_output_directory = tempfile.mkdtemp()
     else:
         page_output_directory = './'
     page_list = create_pages(players, args.template, args.output,
