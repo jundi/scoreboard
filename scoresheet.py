@@ -12,8 +12,8 @@ UNO-enabled python can be provided with -u argument
 '''
 import argparse
 import os.path
-from appy.pod.renderer import Renderer
-from pyPdf import PdfFileWriter, PdfFileReader
+import appy.pod.renderer
+import pyPdf
 
 
 SEP = ','
@@ -79,10 +79,10 @@ def merge_pdf(input_files, output_file):
     :param output_file: filename of merged pdf
     :returns: None
     """
-    output_pdf = PdfFileWriter()
+    output_pdf = pyPdf.PdfFileWriter()
 
     for page in input_files:
-        input_pdf = PdfFileReader(file(page))
+        input_pdf = pyPdf.PdfFileReader(file(page))
         output_pdf.addPage(input_pdf.getPage(0))
 
     with file(output_file, "wb") as output_stream:
@@ -114,10 +114,12 @@ def create_pages(players, template, output_basename, uno_path,
                 "File \"{}\" already exists".format(page_output_path)
             )
         page_list.append(page_output_path)
-        renderer = Renderer(template,
-                            {'players':players, 'player_num':player_num},
-                            page_output_path,
-                            pythonWithUnoPath=uno_path)
+        renderer = appy.pod.renderer.Renderer(
+            template,
+            {'players':players, 'player_num':player_num},
+            page_output_path,
+            pythonWithUnoPath=uno_path
+        )
         renderer.run()
         page_num = page_num+1
         player_num = page_num*PLAYERS_PER_PAGE
