@@ -1,5 +1,4 @@
 #!/usr/bin/env python2
-# pylint: disable=invalid-name
 '''
 Reads text file with rows formatted as:
 <Name>,<Team>,<Serie>
@@ -17,96 +16,137 @@ from appy.pod.renderer import Renderer
 from pyPdf import PdfFileWriter, PdfFileReader
 
 
-
-### DEFAULTS
 SEP = ','
 PLAYERS_PER_PAGE = 3
 TEMPLATE_FILE_NAME = 'henkkari.ods'
 OUTPUT_FILE_NAME = 'result.pdf'
-UNO_PATH = None
+UNO_PATH = '/usr/bin/python3'
 
 
+def parse_arguments():
+    """Parse commandline argumernts.
 
-### PARSE ARGUMENTS
-parser = argparse.ArgumentParser(
-    description=__doc__, formatter_class=argparse.RawTextHelpFormatter
-)
-parser.add_argument("-f", help="Input file")
-parser.add_argument("-t", help="Template file")
-parser.add_argument("-o", help="Output file")
-parser.add_argument("-u", help="Uno path (something like: /usr/bin/python)")
-args = parser.parse_args()
+    :returns: commandline arguments
+    """
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument("-f", "--input", help="Input file", required=True)
+    parser.add_argument("-t", "--template", help="Template file",
+                        default=TEMPLATE_FILE_NAME)
+    parser.add_argument("-o", "--output", help="Output file",
+                        default=OUTPUT_FILE_NAME)
+    parser.add_argument("-u", "--uno-path",
+                        help="Uno path (something like: /usr/bin/python)",
+                        default=UNO_PATH)
 
-if args.f:
-    input_file_name = args.f
-else:
-    exit('No input file given')
+    args = parser.parse_args()
+    if not os.path.exists(args.input):
+        exit("Input file \"{}\" not found".format(args.input))
+    if not os.path.exists(args.template):
+        exit("Template file \"{}\" not found".format(args.template))
+    if os.path.exists(args.output):
+        exit("Output file \"{}\" already exists".format(args.output))
 
-if args.o:
-    OUTPUT_FILE_NAME = args.o
+    return args
 
-if args.t:
-    TEMPLATE_FILE_NAME = args.t
-else:
-    print "Using default template: " + TEMPLATE_FILE_NAME
-if not os.path.exists(TEMPLATE_FILE_NAME):
-    exit("Templatefile \"{}\" not found".format(TEMPLATE_FILE_NAME))
+def read_file(filename):
+    """Read file that contains three words per line, separated by comma.
 
-if args.u:
-    UNO_PATH = args.u
+    :param filename: path to the file
+    :returns: List rows, where each row is list of words
+    """
+    # init player list
+    players = []
 
+    # read file
+    with open(filename) as input_file:
+        for line in input_file:
+            if line.isspace():
+                continue
+            words = line.split(SEP)
+            if len(words) == 3:
+                players.append(words)
+            else:
+                exit("Faulty line: " + line)
 
+    return players
 
-### READ FILE
-# init player list
-players = []
+def merge_pdf(input_files, output_file):
+    """Merge list of pdf files into one pdf.
 
-# read file
-with open(input_file_name) as input_file:
-    for line in input_file:
-        if line.isspace():
-            continue
-        words = line.split(SEP)
-        if len(words) == 3:
-            players.append(words)
-        else:
-            exit("Faulty line: " + line)
-
-# add empty lines to player list if needed
-while len(players)%PLAYERS_PER_PAGE > 0:
-    players.append(['', '', ''])
-
-
-
-
-### CREATE PAGES (pdf, ods or something else)
-page_num = 0
-player_num = 0
-page_list = []
-while player_num < len(players):
-    page_output_file_name = ''.join(OUTPUT_FILE_NAME.split('.')[:-1]) + '_' \
-        + str(page_num) + '.' + OUTPUT_FILE_NAME.split('.')[-1]
-    if os.path.exists(page_output_file_name):
-        exit("File \"{}\" already exists".format(page_output_file_name))
-    page_list.append(page_output_file_name)
-    renderer = Renderer(TEMPLATE_FILE_NAME,
-                        {'players':players, 'player_num':player_num},
-                        page_output_file_name,
-                        pythonWithUnoPath=UNO_PATH)
-    renderer.run()
-    page_num = page_num+1
-    player_num = page_num*PLAYERS_PER_PAGE
-
-
-
-### MERGE PAGES TO ONE PDF-FILE (if output is pdf)
-if OUTPUT_FILE_NAME.split('.')[-1] == 'pdf':
+    :param input_files: list of filenames of pdfs to be merged
+    :param output_file: filename of merged pdf
+    :returns: None
+    """
     output_pdf = PdfFileWriter()
 
-    for page in page_list:
+    for page in input_files:
         input_pdf = PdfFileReader(file(page))
         output_pdf.addPage(input_pdf.getPage(0))
 
-    output_stream = file(OUTPUT_FILE_NAME, "wb")
-    output_pdf.write(output_stream)
-    output_stream.close()
+    with file(output_file, "wb") as output_stream:
+        output_pdf.write(output_stream)
+
+
+
+def create_pages(players, template, output_basename, uno_path,
+                 output_directory='/tmp/'):
+    """Create pages as individual files. The file format is decided from the
+    output file suffix.
+
+    :param players: list of players
+    :param template: template file path
+    :param output_basename: base name for output files
+    :param output_directory: directory where outfiles are created
+    :returns: list of filenames
+    """
+    page_num = 0
+    player_num = 0
+    page_list = []
+    while player_num < len(players):
+        page_output_file_name = ''.join(output_basename.split('.')[:-1]) \
+            + '_' + str(page_num) + '.' + output_basename.split('.')[-1]
+        page_output_path = os.path.join(output_directory,
+                                        page_output_file_name)
+        if os.path.exists(page_output_path):
+            raise IOError(
+                "File \"{}\" already exists".format(page_output_path)
+            )
+        page_list.append(page_output_path)
+        renderer = Renderer(template,
+                            {'players':players, 'player_num':player_num},
+                            page_output_path,
+                            pythonWithUnoPath=uno_path)
+        renderer.run()
+        page_num = page_num+1
+        player_num = page_num*PLAYERS_PER_PAGE
+
+    return page_list
+
+
+def main():
+    """Main function"""
+    args = parse_arguments()
+    filetype = args.output.split('.')[-1]
+
+    players = read_file(args.input)
+
+    # add empty lines to player list if needed
+    while len(players)%PLAYERS_PER_PAGE > 0:
+        players.append(['', '', ''])
+
+    # Write scoresheets one printable page per file. If output file is pdf, the
+    # pages will be merged into one document.
+    if filetype == 'pdf':
+        page_output_directory = '/tmp/'
+    else:
+        page_output_directory = './'
+    page_list = create_pages(players, args.template, args.output,
+                             args.uno_path, page_output_directory)
+
+    # merge output files into one file if output file type is pdf
+    if filetype == 'pdf':
+        merge_pdf(page_list, args.output)
+
+main()
