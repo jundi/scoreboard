@@ -152,4 +152,6 @@ def main():
     if filetype == 'pdf':
         merge_pdf(page_list, args.output)
 
-main()
+
+if __name__ == "__main__":
+    main()
