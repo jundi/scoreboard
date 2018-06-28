@@ -17,7 +17,7 @@ import appy.pod.renderer
 import pyPdf
 
 
-SEP = ','
+SEP = ';'
 PLAYERS_PER_PAGE = 3
 TEMPLATE_FILE_NAME = 'henkkari.ods'
 OUTPUT_FILE_NAME = 'result.pdf'
@@ -66,7 +66,7 @@ def read_file(filename):
             if line.isspace():
                 continue
             words = line.split(SEP)
-            if len(words) == 3:
+            if len(words) == 4:
                 players.append(words)
             else:
                 exit("Faulty line: " + line)
@@ -137,7 +137,7 @@ def main():
 
     # add empty lines to player list if needed
     while len(players)%PLAYERS_PER_PAGE > 0:
-        players.append(['', '', ''])
+        players.append(['', '', '', ''])
 
     # Write scoresheets one printable page per file. If output file is pdf, the
     # pages will be merged into one document.
