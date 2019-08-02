@@ -13,6 +13,8 @@ UNO-enabled python can be provided with -u argument
 import argparse
 import os.path
 import tempfile
+import csv
+
 import appy.pod.renderer
 import pyPdf
 
@@ -57,19 +59,15 @@ def read_file(filename):
     :param filename: path to the file
     :returns: List rows, where each row is list of words
     """
-    # init player list
-    players = []
-
     # read file
     with open(filename) as input_file:
-        for line in input_file:
-            if line.isspace():
-                continue
-            words = line.split(SEP)
-            if len(words) == 4:
-                players.append(words)
-            else:
-                exit("Faulty line: " + line)
+        reader = csv.reader(input_file, delimiter=';', quotechar='"')
+        players = list(reader)
+
+    for player in players:
+        if len(player) != 4:
+            exit("A record in input file contains wrong number of fields: {}"
+                 .format(player))
 
     return players
 
