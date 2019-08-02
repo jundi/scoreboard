@@ -16,7 +16,7 @@ import tempfile
 import csv
 
 import appy.pod.renderer
-import pyPdf
+import PyPDF2
 
 
 SEP = ';'
@@ -80,13 +80,13 @@ def merge_pdf(input_files, output_file):
     :param output_file: filename of merged pdf
     :returns: None
     """
-    output_pdf = pyPdf.PdfFileWriter()
+    output_pdf = PyPDF2.PdfFileMerger()
 
     for page in input_files:
-        input_pdf = pyPdf.PdfFileReader(file(page))
-        output_pdf.addPage(input_pdf.getPage(0))
+        with open(page, 'rb') as input_stream:
+            output_pdf.append(input_stream)
 
-    with file(output_file, "wb") as output_stream:
+    with open(output_file, "wb") as output_stream:
         output_pdf.write(output_stream)
 
 
