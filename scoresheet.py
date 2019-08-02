@@ -53,6 +53,7 @@ def parse_arguments():
 
     return args
 
+
 def read_file(filename):
     """Read file that contains three words per line, separated by comma.
 
@@ -71,6 +72,7 @@ def read_file(filename):
 
     return players
 
+
 def merge_pdf(input_files, output_file):
     """Merge list of pdf files into one pdf.
 
@@ -86,7 +88,6 @@ def merge_pdf(input_files, output_file):
 
     with file(output_file, "wb") as output_stream:
         output_pdf.write(output_stream)
-
 
 
 def create_pages(players, template, output_basename, uno_path,
@@ -115,7 +116,7 @@ def create_pages(players, template, output_basename, uno_path,
         page_list.append(page_output_path)
         renderer = appy.pod.renderer.Renderer(
             template,
-            {'players':players, 'player_num':player_num},
+            {'players': players, 'player_num': player_num},
             page_output_path,
             pythonWithUnoPath=uno_path
         )
@@ -134,7 +135,7 @@ def main():
     players = read_file(args.input)
 
     # add empty lines to player list if needed
-    while len(players)%PLAYERS_PER_PAGE > 0:
+    while len(players) % PLAYERS_PER_PAGE > 0:
         players.append(['', '', '', ''])
 
     # Write scoresheets one printable page per file. If output file is pdf, the
