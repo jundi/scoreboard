@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# PYTHON_ARGCOMPLETE_OK
 '''
 Reads text file with rows formatted as:
 <Name>,<Team>,<Serie>
@@ -17,6 +18,7 @@ import csv
 
 import appy.pod.renderer
 import PyPDF2
+import argcomplete
 
 
 SEP = ';'
@@ -42,6 +44,8 @@ def parse_arguments():
     parser.add_argument("-u", "--uno-path",
                         help="Uno path (something like: /usr/bin/python)",
                         default=UNO_PATH)
+
+    argcomplete.autocomplete(parser)
 
     args = parser.parse_args()
     if not os.path.exists(args.input):
