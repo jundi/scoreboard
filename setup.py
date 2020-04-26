@@ -9,5 +9,5 @@ setup(
     entry_points={
         "console_scripts": ["scoresheet=scoresheet:main"]
     },
-    install_requires=['PyPDF2', 'appy']
+    install_requires=['PyPDF2', 'appy', 'argcomplete']
 )
