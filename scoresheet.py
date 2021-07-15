@@ -2,7 +2,7 @@
 # PYTHON_ARGCOMPLETE_OK
 '''
 Reads text file with rows formatted as:
-<Name>,<Team>,<Serie>
+<Name>;<Team>;<Serie>;<Compensation>
 and exports scoresheets in ods/pdf format.
 
 The script is using LibreOffice UNO API. UNO server can be started with
@@ -12,12 +12,13 @@ If the python interpreter running the script is not UNO-enabled, the path of
 UNO-enabled python can be provided with -u argument
 '''
 import argparse
-import os.path
-import tempfile
 import csv
+import os.path
+import sys
+import tempfile
 
-import appy.pod.renderer
 import PyPDF2
+import appy.pod.renderer
 import argcomplete
 
 
@@ -49,11 +50,11 @@ def parse_arguments():
 
     args = parser.parse_args()
     if not os.path.exists(args.input):
-        exit("Input file \"{}\" not found".format(args.input))
+        sys.exit("Input file \"{}\" not found".format(args.input))
     if not os.path.exists(args.template):
-        exit("Template file \"{}\" not found".format(args.template))
+        sys.exit("Template file \"{}\" not found".format(args.template))
     if os.path.exists(args.output):
-        exit("Output file \"{}\" already exists".format(args.output))
+        sys.exit("Output file \"{}\" already exists".format(args.output))
 
     return args
 
@@ -71,8 +72,10 @@ def read_file(filename):
 
     for player in players:
         if len(player) != 4:
-            exit("A record in input file contains wrong number of fields: {}"
-                 .format(player))
+            sys.exit(
+                "A record in input file contains wrong number of fields: {}"
+                .format(player)
+            )
 
     return players
 
