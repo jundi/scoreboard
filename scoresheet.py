@@ -89,9 +89,8 @@ def merge_pdf(input_files, output_file):
     """
     output_pdf = PyPDF2.PdfFileMerger()
 
-    for page in input_files:
-        with open(page, 'rb') as input_stream:
-            output_pdf.append(input_stream)
+    for input_file in input_files:
+        output_pdf.append(input_file)
 
     with open(output_file, "wb") as output_stream:
         output_pdf.write(output_stream)
@@ -127,7 +126,16 @@ def create_pages(players, template, output_basename, uno_path,
             page_output_path,
             pythonWithUnoPath=uno_path
         )
-        renderer.run()
+        try:
+            renderer.run()
+        except appy.pod.PodError as error:
+            if "Couldn't not connect to LibreOffice on port 2002" \
+                    in str(error):
+                sys.exit(
+                    str(error) + '\n\nStart LibreOffice first:'
+                    '\n\n    soffice --accept="socket,port=2002;urp;"'
+                )
+
         page_num = page_num+1
         player_num = page_num*PLAYERS_PER_PAGE
 
