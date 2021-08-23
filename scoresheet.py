@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # PYTHON_ARGCOMPLETE_OK
 '''
 Reads text file with rows formatted as:
@@ -20,6 +20,7 @@ import tempfile
 import PyPDF2
 import appy.pod.renderer
 import argcomplete
+import charset_normalizer
 
 
 SEP = ';'
@@ -68,8 +69,9 @@ def read_file(filename):
     :param filename: path to the file
     :returns: List of players
     """
-    # read file
-    with open(filename) as input_file:
+    # Read CSV file
+    encoding = charset_normalizer.from_path(filename).best().encoding
+    with open(filename, encoding=encoding) as input_file:
         reader = csv.reader(input_file, delimiter=';', quotechar='"')
         players = list(reader)
 
