@@ -60,22 +60,22 @@ def parse_arguments():
 
 
 def read_file(filename):
-    """Read file that contains three words per line, separated by comma.
+    """Read player information from CSV file. The file contains four
+    columns per line (player name, team, serie and age compensation). If
+    a field contains less than 4 columns, the missing values are set to
+    empty strings.
 
     :param filename: path to the file
-    :returns: List rows, where each row is list of words
+    :returns: List of players
     """
     # read file
     with open(filename) as input_file:
         reader = csv.reader(input_file, delimiter=';', quotechar='"')
         players = list(reader)
 
+    # Pad player information with empty strings
     for player in players:
-        if len(player) != 4:
-            sys.exit(
-                "A record in input file contains wrong number of fields: {}"
-                .format(player)
-            )
+        player += [''] * (4 - len(player))
 
     return players
 
